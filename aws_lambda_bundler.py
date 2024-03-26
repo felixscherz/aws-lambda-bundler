@@ -4,10 +4,12 @@ import sys
 from pathlib import Path
 
 
-def _install_to_dir(python: str, scratch_dir: Path, dependencies: list[str], index_url=None):
+def _install_to_dir(python: str, scratch_dir: Path, dependencies: list[str], index_url=None, platform=None):
     cmd = [python, "-m", "pip", "install", "-t", scratch_dir.as_posix()]
     if index_url:
         cmd += ["--index-url", index_url]
+    if platform:
+        cmd += ["--platform", platform, "--only-binary", ":all:"]
     cmd += dependencies
     p = subprocess.run(
         cmd,
@@ -43,6 +45,7 @@ def main():
     parser.add_argument("--output", required=True)
     parser.add_argument("--interpreter", required=False, default=sys.executable, help="path to the python interpreter")
     parser.add_argument("--index-url", required=False, help="index url to pass on to pip")
+    parser.add_argument("--platform", required=False, help="install only wheel compatible with <platform>")
     parser.add_argument("dependencies", nargs="+")
     args = parser.parse_args()
 
@@ -52,11 +55,15 @@ def main():
     if not output.is_absolute():
         output = Path.cwd().joinpath(output)
     dependencies: list[str] = args.dependencies
+    platform = args.platform
+    index_url = args.index_url
 
     if not scratch_dir.is_absolute():
         scratch_dir = Path.cwd().joinpath(scratch_dir)
 
-    _install_to_dir(python=python, scratch_dir=scratch_dir, dependencies=dependencies)
+    _install_to_dir(
+        python=python, scratch_dir=scratch_dir, dependencies=dependencies, index_url=index_url, platform=platform
+    )
     _zip_dir(output=output, scratch_dir=scratch_dir)
 
     sys.stdout.write(f"{output.absolute().as_posix()}\n")
