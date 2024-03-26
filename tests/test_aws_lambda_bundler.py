@@ -13,6 +13,14 @@ def test_install_to_dir():
     assert len(list(scratch_dir.glob("*")))
 
 
+def test_install_to_dir_specifying_index():
+    dependencies = ["requests"]
+    python = sys.executable
+    scratch_dir = Path(tempfile.mkdtemp())
+    aws_lambda_bundler._install_to_dir(python, scratch_dir, dependencies, index_url="https://pypi.org./simple")
+    assert len(list(scratch_dir.glob("*")))
+
+
 def test_zip_dir():
     scratch_dir = Path(tempfile.mkdtemp())
     output = Path(tempfile.mkdtemp()) / "out.zip"

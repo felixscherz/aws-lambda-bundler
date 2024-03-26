@@ -4,9 +4,13 @@ import sys
 from pathlib import Path
 
 
-def _install_to_dir(python: str, scratch_dir: Path, dependencies: list[str]):
+def _install_to_dir(python: str, scratch_dir: Path, dependencies: list[str], index_url=None):
+    cmd = [python, "-m", "pip", "install", "-t", scratch_dir.as_posix()]
+    if index_url:
+        cmd += ["--index-url", index_url]
+    cmd += dependencies
     p = subprocess.run(
-        [python, "-m", "pip", "install", "-t", scratch_dir.as_posix()] + dependencies,
+        cmd,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
@@ -35,11 +39,14 @@ def _zip_dir(output: Path, scratch_dir: Path):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--scratch-dir", required=True)
+    parser.add_argument("--scratch-dir", required=True, help="directory used to install dependencies into")
     parser.add_argument("--output", required=True)
+    parser.add_argument("--interpreter", required=False, default=sys.executable, help="path to the python interpreter")
+    parser.add_argument("--index-url", required=False, help="index url to pass on to pip")
     parser.add_argument("dependencies", nargs="+")
     args = parser.parse_args()
 
+    python = args.interpreter
     scratch_dir: Path = Path(args.scratch_dir)
     output: Path = Path(args.output)
     if not output.is_absolute():
@@ -48,8 +55,6 @@ def main():
 
     if not scratch_dir.is_absolute():
         scratch_dir = Path.cwd().joinpath(scratch_dir)
-
-    python = sys.executable
 
     _install_to_dir(python=python, scratch_dir=scratch_dir, dependencies=dependencies)
     _zip_dir(output=output, scratch_dir=scratch_dir)
