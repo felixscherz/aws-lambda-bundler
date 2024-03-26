@@ -1,3 +1,9 @@
+## v0.3.0 (2024-03-26)
+
+### Feat
+
+- can now specify -r requirements.txt for pip
+
 ## v0.2.0 (2024-03-26)
 
 ### Feat
