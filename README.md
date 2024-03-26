@@ -5,15 +5,21 @@
 
 -----
 
-**Table of Contents**
+## What is it?
 
-- [Installation](#installation)
-- [License](#license)
+`aws-lambda-bundler` is a utility to build zip archives to run AWS Lambda functions from a list of dependencies.
+
 
 ## Installation
 
 ```console
 pip install aws-lambda-bundler
+```
+
+## Usage
+
+```console
+aws-lambda-bundler --scratch-dir /tmp/build-dir --output my-lambda.zip requests boto3
 ```
 
 ## License
