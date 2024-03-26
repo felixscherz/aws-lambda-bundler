@@ -20,6 +20,7 @@ def _install_to_dir(
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
+    print(f"using interpreter {python} to run pip and install dependencies...", file=sys.stderr)
     print(f"installing dependencies to {scratch_dir.absolute().as_posix()}", file=sys.stderr)
     if not p.returncode == 0:
         print("pip failed to install dependencies:", file=sys.stderr)
