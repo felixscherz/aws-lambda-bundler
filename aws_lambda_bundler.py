@@ -4,12 +4,16 @@ import sys
 from pathlib import Path
 
 
-def _install_to_dir(python: str, scratch_dir: Path, dependencies: list[str], index_url=None, platform=None):
+def _install_to_dir(
+    python: str, scratch_dir: Path, dependencies: list[str], index_url=None, platform=None, requirements=None
+):
     cmd = [python, "-m", "pip", "install", "-t", scratch_dir.as_posix()]
     if index_url:
         cmd += ["--index-url", index_url]
     if platform:
         cmd += ["--platform", platform, "--only-binary", ":all:"]
+    if requirements:
+        cmd += ["-r", requirements]
     cmd += dependencies
     p = subprocess.run(
         cmd,
@@ -46,7 +50,8 @@ def main():
     parser.add_argument("--interpreter", required=False, default=sys.executable, help="path to the python interpreter")
     parser.add_argument("--index-url", required=False, help="index url to pass on to pip")
     parser.add_argument("--platform", required=False, help="install only wheel compatible with <platform>")
-    parser.add_argument("dependencies", nargs="+")
+    parser.add_argument("--requirements", "-r", required=False, help="requirements file passed on to pip")
+    parser.add_argument("dependencies", nargs="*")
     args = parser.parse_args()
 
     python = args.interpreter
@@ -57,12 +62,21 @@ def main():
     dependencies: list[str] = args.dependencies
     platform = args.platform
     index_url = args.index_url
+    requirements = args.requirements
+
+    if not requirements and not dependencies:
+        print("must at least specify one of --requirements or dependencies", file=sys.stderr)
 
     if not scratch_dir.is_absolute():
         scratch_dir = Path.cwd().joinpath(scratch_dir)
 
     _install_to_dir(
-        python=python, scratch_dir=scratch_dir, dependencies=dependencies, index_url=index_url, platform=platform
+        python=python,
+        scratch_dir=scratch_dir,
+        dependencies=dependencies,
+        index_url=index_url,
+        platform=platform,
+        requirements=requirements,
     )
     _zip_dir(output=output, scratch_dir=scratch_dir)
 
