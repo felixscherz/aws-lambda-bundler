@@ -1,3 +1,14 @@
+## v0.4.0 (2024-03-29)
+
+### Feat
+
+- add --app-dir flag
+- implement caching
+
+### Refactor
+
+- rename scratch_dir -> target_dir for install function
+
 ## v0.3.0 (2024-03-26)
 
 ### Feat
