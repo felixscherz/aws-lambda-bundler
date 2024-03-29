@@ -4,3 +4,4 @@ __pycache__
 venv
 .tox
 .pytest_cache
+.aws_lambda_bundler
