@@ -1,6 +1,7 @@
 import argparse
 import subprocess
 import sys
+import hashlib
 from pathlib import Path
 
 
@@ -28,15 +29,15 @@ def _install_to_dir(
         sys.exit(p.returncode)
 
 
-def _zip_dir(output: Path, scratch_dir: Path):
+def _zip_dir(output: Path, dir: Path):
     p = subprocess.run(
         ["zip", "-r", output.absolute().as_posix(), "."],
-        cwd=scratch_dir,
+        cwd=dir,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
     print(
-        f"zipping contents of {scratch_dir.absolute().as_posix()} to {output.absolute().as_posix()}",
+        f"zipping contents of {dir.absolute().as_posix()} to {output.absolute().as_posix()}",
         file=sys.stderr,
     )
     if not p.returncode == 0:
@@ -46,7 +47,7 @@ def _zip_dir(output: Path, scratch_dir: Path):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--scratch-dir", required=True, help="directory used to install dependencies into")
+    parser.add_argument("--app-dir", default=".aws_lambda_bundler")
     parser.add_argument("--output", required=True)
     parser.add_argument("--interpreter", required=False, default=sys.executable, help="path to the python interpreter")
     parser.add_argument("--index-url", required=False, help="index url to pass on to pip")
@@ -56,7 +57,9 @@ def main():
     args = parser.parse_args()
 
     python = args.interpreter
-    scratch_dir: Path = Path(args.scratch_dir)
+    app_dir = Path(args.app_dir)
+    if not app_dir.is_dir():
+        app_dir.mkdir(parents=True)
     output: Path = Path(args.output)
     if not output.is_absolute():
         output = Path.cwd().joinpath(output)
@@ -68,18 +71,22 @@ def main():
     if not requirements and not dependencies:
         print("must at least specify one of --requirements or dependencies", file=sys.stderr)
 
-    if not scratch_dir.is_absolute():
-        scratch_dir = Path.cwd().joinpath(scratch_dir)
+    key = hashlib.md5("".join(args.dependencies).encode())
+    if args.requirements:
+        with open(args.requirements,"rb") as handle:
+            key.update(handle.read())
 
-    _install_to_dir(
-        python=python,
-        target_dir=scratch_dir,
-        dependencies=dependencies,
-        index_url=index_url,
-        platform=platform,
-        requirements=requirements,
-    )
-    _zip_dir(output=output, scratch_dir=scratch_dir)
+    target_dir = app_dir / key.hexdigest()
+    if not target_dir.is_dir():
+        _install_to_dir(
+            python=python,
+            target_dir=target_dir,
+            dependencies=dependencies,
+            index_url=index_url,
+            platform=platform,
+            requirements=requirements,
+        )
+    _zip_dir(output=output, dir=target_dir)
 
     sys.stdout.write(f"{output.absolute().as_posix()}\n")
     return 0
