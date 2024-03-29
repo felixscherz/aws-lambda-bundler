@@ -3,6 +3,7 @@ import subprocess
 import sys
 import hashlib
 from pathlib import Path
+from typing import Optional
 
 AWS_LAMBDA_BUNDLER_DEFAULT_APP = ".aws_lambda_bundler"
 
@@ -46,6 +47,13 @@ def _zip_dir(output: Path, dir: Path):
         print(p.stderr, file=sys.stderr)
         sys.exit(p.returncode)
 
+def _generate_dirname(app_dir: Path, dependencies: list[str], requirements: Optional[str] = None) -> Path:
+    key = hashlib.md5("".join(dependencies).encode())
+    if requirements:
+        with open(requirements,"rb") as handle:
+            key.update(handle.read())
+
+    return  app_dir / key.hexdigest()
 
 def main():
     parser = argparse.ArgumentParser()
@@ -58,13 +66,11 @@ def main():
     parser.add_argument("dependencies", nargs="*")
     args = parser.parse_args()
 
-    python = args.interpreter
     app_dir = Path(args.app_dir)
     if not app_dir.is_dir():
         app_dir.mkdir(parents=True)
-    output: Path = Path(args.output)
-    if not output.is_absolute():
-        output = Path.cwd().joinpath(output)
+
+    python = args.interpreter
     dependencies: list[str] = args.dependencies
     platform = args.platform
     index_url = args.index_url
@@ -73,12 +79,8 @@ def main():
     if not requirements and not dependencies:
         print("must at least specify one of --requirements or dependencies", file=sys.stderr)
 
-    key = hashlib.md5("".join(args.dependencies).encode())
-    if args.requirements:
-        with open(args.requirements,"rb") as handle:
-            key.update(handle.read())
+    target_dir = _generate_dirname(app_dir, dependencies, requirements)
 
-    target_dir = app_dir / key.hexdigest()
     if not target_dir.is_dir():
         _install_to_dir(
             python=python,
@@ -88,6 +90,9 @@ def main():
             platform=platform,
             requirements=requirements,
         )
+
+
+    output = Path(args.output)
     _zip_dir(output=output, dir=target_dir)
 
     sys.stdout.write(f"{output.absolute().as_posix()}\n")
