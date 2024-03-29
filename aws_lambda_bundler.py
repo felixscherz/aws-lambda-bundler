@@ -4,6 +4,8 @@ import sys
 import hashlib
 from pathlib import Path
 
+AWS_LAMBDA_BUNDLER_DEFAULT_APP = ".aws_lambda_bundler"
+
 
 def _install_to_dir(
     python: str, target_dir: Path, dependencies: list[str], index_url=None, platform=None, requirements=None
@@ -47,7 +49,7 @@ def _zip_dir(output: Path, dir: Path):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--app-dir", default=".aws_lambda_bundler")
+    parser.add_argument("--app-dir", default=AWS_LAMBDA_BUNDLER_DEFAULT_APP)
     parser.add_argument("--output", required=True)
     parser.add_argument("--interpreter", required=False, default=sys.executable, help="path to the python interpreter")
     parser.add_argument("--index-url", required=False, help="index url to pass on to pip")
