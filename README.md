@@ -19,7 +19,7 @@ pip install aws-lambda-bundler
 ## Usage
 
 ```console
-aws-lambda-bundler --scratch-dir /tmp/build-dir --output my-lambda.zip requests boto3
+aws-lambda-bundler --output my-lambda.zip requests boto3
 ```
 
 ## License
