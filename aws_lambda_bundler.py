@@ -5,9 +5,9 @@ from pathlib import Path
 
 
 def _install_to_dir(
-    python: str, scratch_dir: Path, dependencies: list[str], index_url=None, platform=None, requirements=None
+    python: str, target_dir: Path, dependencies: list[str], index_url=None, platform=None, requirements=None
 ):
-    cmd = [python, "-m", "pip", "install", "-t", scratch_dir.as_posix()]
+    cmd = [python, "-m", "pip", "install", "-t", target_dir.as_posix()]
     if index_url:
         cmd += ["--index-url", index_url]
     if platform:
@@ -21,7 +21,7 @@ def _install_to_dir(
         stderr=subprocess.PIPE,
     )
     print(f"using interpreter {python} to run pip and install dependencies...", file=sys.stderr)
-    print(f"installing dependencies to {scratch_dir.absolute().as_posix()}", file=sys.stderr)
+    print(f"installing dependencies to {target_dir.absolute().as_posix()}", file=sys.stderr)
     if not p.returncode == 0:
         print("pip failed to install dependencies:", file=sys.stderr)
         print(p.stderr, file=sys.stderr)
@@ -73,7 +73,7 @@ def main():
 
     _install_to_dir(
         python=python,
-        scratch_dir=scratch_dir,
+        target_dir=scratch_dir,
         dependencies=dependencies,
         index_url=index_url,
         platform=platform,
