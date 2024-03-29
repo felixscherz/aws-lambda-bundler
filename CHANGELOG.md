@@ -1,9 +1,14 @@
+## v0.4.1 (2024-03-29)
+
+### Refactor
+
+- set default variables
+
 ## v0.4.0 (2024-03-29)
 
 ### Feat
 
 - add --app-dir flag
-- implement caching
 
 ### Refactor
 
