@@ -5,7 +5,7 @@
 
 -----
 
-## What is it?
+## Rationale
 
 `aws-lambda-bundler` is a utility to build zip archives to run AWS Lambda functions from a list of dependencies.
 
