@@ -1,10 +1,13 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = [
+    "setuptools>=61.0",
+    "setuptools-scm>=8.0"
+]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "aws_lambda_bundler"
-version = "0.4.1"
+dynamic = ["version"]
 description = 'utility to build zip archives to run AWS Lambda functions'
 readme = "README.md"
 requires-python = ">=3.8"
@@ -33,3 +36,11 @@ Source = "https://github.com/unknown/aws-lambda-bundler"
 
 [project.scripts]
 aws-lambda-bundler = "aws_lambda_bundler:main"
+
+[tool.towncrier]
+name = "aws-lambda-bundler"
+package = "aws_lambda_bundler"
+directory = "changes"
+filename = "CHANGELOG.md"
+
+[tool.setuptools_scm]
