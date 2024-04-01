@@ -1,3 +1,8 @@
+# aws-lambda-bundler 0.4.2 (2024-04-01)
+
+No significant changes.
+
+
 ## v0.4.1 (2024-03-29)
 
 ### Refactor
